@@ -13,24 +13,40 @@ let rejectedApplications = [
     { Name: "John Doe",  Questions: [ {  Id: "1", Answer: "no" }, {  Id: "2", Answer: "no" }, {  Id: "3", Answer: "yes" }, {  Id: "4", Answer: "no" }] },
 ]
 
+// Utils
+const isAcceptedApplication = (questions) => {
+    let test
+    if(Array.isArray(questions) && questions.length > 0) {
+        test = questions.map(question => {
+            // {  Id: "1", Answer: "yes" }
+            const answerIndex = acceptibleAnswers.findIndex(x => x.Id == question.Id)
+            return acceptibleAnswers[answerIndex].Answer == question.Answer ? true : false
+        });
+    } else {
+        console.log('questions are not coming through as an array.')
+    }
+
+    return test.includes(false) ? false : true
+}
 
 // Handlers
-const getAcceptedApplications = async (req, reply) => {
+const getAcceptedApplications = (req, reply) => {
     return accpetedApplications
 }
 
-const getRejectedApplications = async (req, reply) => {
+const getRejectedApplications = (req, reply) => {
     return rejectedApplications
 }
 
-const addApplication = async (req, reply) => {
-    let id;
-    let newApplication = req.body
-    
-    console.log(newApplication)
-
-    // acceptedApplications.push(newApplication)
-    return newApplication
+const addApplication = async (request, reply) => {
+    if (isAcceptedApplication(request.body.Questions)) {
+        accpetedApplications.push(request.body)
+        return {msg: "your application was accepted" ,accpetedApplications}
+    } else {
+        rejectedApplications.push(request.body)
+        return {msg: "your application was rejected", rejectedApplications}
+    }
+    return null
 }
 
 module.exports = {

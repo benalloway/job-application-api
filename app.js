@@ -1,7 +1,8 @@
-// Require the framework and instantiate it
 const fastify = require('fastify')({
     logger: true
   })
+
+const {getAcceptedApplications, addApplication} = require('./controller/applications')
 
 // Implement a solution that:
 // 1. Contains a list of Questions with an acceptable answer for each question:
@@ -18,10 +19,33 @@ const fastify = require('fastify')({
 // 6. Unaccepted applications must not be shown to the employer.
 
 
-  // Declare a route
+  // Declare '/'
   fastify.get('/', function (request, reply) {
     reply.send({ hello: 'world' })
   })
+
+  // Applications routes
+
+  // Get Accepted Applications
+  fastify.get('/applications', function (request, reply) {
+      const appliations = getAcceptedApplications()
+      console.log(appliations)
+      reply.send(JSON.stringify(appliations))
+  })
+
+  // Submit new Application
+  fastify.post('/applications',{
+      body: {
+        type: 'array',
+      }
+    }, async function (request, reply){
+        // { Name: "John Doe",  Questions: [ {  Id: "1", Answer: "yes" }, {  Id: "2", Answer: "yes" }, {  Id: "3", Answer: "no" }, {  Id: "4", Answer: "yes" }] },
+        // const {Name, Questions} = JSON.parse(request.body)
+        
+        const result = await addApplication(request, reply)
+        reply.send(result)
+    }
+  )
   
   // Run the server!
   fastify.listen(3000, function (err, address) {
