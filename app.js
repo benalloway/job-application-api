@@ -6,7 +6,7 @@ const server = fastify({
 })
 
 
-import {getAcceptedApplications, addApplication} from './controller/applications.mjs'
+import {getApplications, addApplication} from './controller/applications.mjs'
 
 // Implement a solution that:
 // 1. Contains a list of Questions with an acceptable answer for each question:
@@ -28,25 +28,31 @@ import {getAcceptedApplications, addApplication} from './controller/applications
     reply.send({ hello: 'world' })
   })
 
-  // Applications routes
-
   // Get Accepted Applications
   server.get('/applications', async function (request, reply) {
-      const accepted_applications = await getAcceptedApplications()
+
+      const {accepted_applications, error} = await getApplications()
+
+      if(error) {
+        return reply.status(500).send(error);
+      }
+
       return reply.status(200).send(accepted_applications)
   })
 
-  // Submit new Application
+  // Submit a new Application
   server.post('/applications',{
       body: {
         type: 'array',
       }
     }, async function (request, reply){
-        // { Name: "John Doe",  Questions: [ {  Id: "1", Answer: "yes" }, {  Id: "2", Answer: "yes" }, {  Id: "3", Answer: "no" }, {  Id: "4", Answer: "yes" }] },
-        // const {Name, Questions} = JSON.parse(request.body)
-        
-        const result = await addApplication(request, reply)
-        reply.send(result)
+        const {data, error} = await addApplication(request, reply)
+       
+        if(error) {
+          return reply.status(500).send(error);
+        }
+
+        return reply.status(200).send(data)
     }
   )
   
