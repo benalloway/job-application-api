@@ -11,30 +11,6 @@ const acceptibleAnswers = [
         { Id: "4", Question: "are you willing to drive more than 1000 miles a month?", Answer: "yes" },
     ]
 
-// Demo data
-let accpetedApplications = [
-    { Name: "John Doe",  Questions: [ {  Id: "1", Answer: "yes" }, {  Id: "2", Answer: "yes" }, {  Id: "3", Answer: "no" }, {  Id: "4", Answer: "yes" }] },
-]
-let rejectedApplications = [
-    { Name: "John Doe",  Questions: [ {  Id: "1", Answer: "no" }, {  Id: "2", Answer: "no" }, {  Id: "3", Answer: "yes" }, {  Id: "4", Answer: "no" }] },
-]
-
-// Utils
-export const isAcceptedApplication = (questions) => {
-    let test
-    if(Array.isArray(questions) && questions.length > 0) {
-        test = questions.map(question => {
-            // {  Id: "1", Answer: "yes" }
-            const answerIndex = acceptibleAnswers.findIndex(x => x.Id == question.Id)
-            return acceptibleAnswers[answerIndex].Answer == question.Answer ? true : false
-        });
-    } else {
-        console.log('questions are not coming through as an array.')
-    }
-
-    return test.includes(false) ? false : true
-}
-
 // Handlers
 export const getAcceptedApplications = async (req, reply) => {
     const { data: accepted_applications, error } = await supabase
@@ -84,8 +60,17 @@ export const addApplication = async (request, reply) => {
     }
 }
 
-// module.exports = {
-//     getAcceptedApplications,
-//     getRejectedApplications,
-//     addApplication,
-// }
+export const isAcceptedApplication = (questions) => {
+    let test
+    if(Array.isArray(questions) && questions.length > 0) {
+        test = questions.map(question => {
+            // {  Id: "1", Answer: "yes" }
+            const answerIndex = acceptibleAnswers.findIndex(x => x.Id == question.Id)
+            return acceptibleAnswers[answerIndex].Answer == question.Answer ? true : false
+        });
+    } else {
+        console.log('questions are not coming through as an array.')
+    }
+
+    return test.includes(false) ? false : true
+}
