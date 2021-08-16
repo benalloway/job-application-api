@@ -1,8 +1,12 @@
-const fastify = require('fastify')({
-    logger: true
-  })
+import fastify from 'fastify'
+import {config} from 'dotenv'
 
-const {getAcceptedApplications, addApplication} = require('./controller/applications')
+const server = fastify({
+  logger: true
+})
+
+
+import {getAcceptedApplications, addApplication} from './controller/applications.mjs'
 
 // Implement a solution that:
 // 1. Contains a list of Questions with an acceptable answer for each question:
@@ -20,21 +24,20 @@ const {getAcceptedApplications, addApplication} = require('./controller/applicat
 
 
   // Declare '/'
-  fastify.get('/', function (request, reply) {
+  server.get('/', function (request, reply) {
     reply.send({ hello: 'world' })
   })
 
   // Applications routes
 
   // Get Accepted Applications
-  fastify.get('/applications', function (request, reply) {
-      const appliations = getAcceptedApplications()
-      console.log(appliations)
-      reply.send(JSON.stringify(appliations))
+  server.get('/applications', async function (request, reply) {
+      const accepted_applications = await getAcceptedApplications()
+      return reply.status(200).send(accepted_applications)
   })
 
   // Submit new Application
-  fastify.post('/applications',{
+  server.post('/applications',{
       body: {
         type: 'array',
       }
@@ -48,10 +51,10 @@ const {getAcceptedApplications, addApplication} = require('./controller/applicat
   )
   
   // Run the server!
-  fastify.listen(3000, function (err, address) {
+  server.listen(3000, function (err, address) {
     if (err) {
-      fastify.log.error(err)
+      server.log.error(err)
       process.exit(1)
     }
-    fastify.log.info(`server listening on ${address}`)
+    server.log.info(`server listening on ${address}`)
   })

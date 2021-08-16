@@ -1,6 +1,13 @@
 {
+  "scripts": {
+    "start": "node -r dotenv/config app.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^1.21.2",
     "fastify": "^3.20.2"
+  },
+  "type": "module",
+  "devDependencies": {
+    "dotenv": "^10.0.0"
   }
 }
