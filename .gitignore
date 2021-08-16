@@ -1,0 +1,13 @@
+# mac files
+.DS_Store
+
+# vscode
+.vscode
+*code-workspace
+
+# custom
+.env
+
+# Dependency directories
+node_modules
+jspm_packages
