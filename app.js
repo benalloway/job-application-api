@@ -57,7 +57,7 @@ import {getApplications, addApplication} from './controller/applications.mjs'
   )
   
   // Run the server!
-  server.listen(10000, function (err, address) {
+  server.listen(process.env.PORT || 3000, '0.0.0.0', function (err, address) {
     if (err) {
       server.log.error(err)
       process.exit(1)
