@@ -1,12 +1,12 @@
 import fastify from 'fastify'
-import {config} from 'dotenv'
+import cors from "fastify-cors";
 
 const server = fastify({
   logger: true
 })
 
 
-import {getApplications, addApplication} from './controller/applications.mjs'
+import {getApplications, addApplication} from './controller/applications.js'
 
 // Implement a solution that:
 // 1. Contains a list of Questions with an acceptable answer for each question:
@@ -23,13 +23,20 @@ import {getApplications, addApplication} from './controller/applications.mjs'
 // 6. Unaccepted applications must not be shown to the employer.
 
 
+server.register(cors, {
+    origin: [
+      "https://job-application-app.onrender.com",
+      "http://localhost:3000",
+    ],
+  });
+
   // Declare '/'
   server.get('/', function (request, reply) {
     reply.send({ hello: 'world' })
   })
 
   // Get Accepted Applications
-  server.get('/applications', async function (request, reply) {
+  server.get('/api/applications', async function (request, reply) {
 
       const {accepted_applications, error} = await getApplications()
 
@@ -41,7 +48,7 @@ import {getApplications, addApplication} from './controller/applications.mjs'
   })
 
   // Submit a new Application
-  server.post('/applications',{
+  server.post('/api/applications',{
       body: {
         type: 'array',
       }

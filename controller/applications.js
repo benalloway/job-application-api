@@ -8,10 +8,10 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 // TODO: move to db table for reference
 // STRETCH: Once in db, allow for the table to be used accross different job listings by storing listing ID
 const acceptibleAnswers = [ 
-        { Id: "1", Question: "do you own a car?", Answer: "yes" }, 
-        { Id: "2", Question: "do you have a valid license?", Answer: "yes" }, 
-        { Id: "3", Question: "have you ever had a DUI?", Answer: "no" },
-        { Id: "4", Question: "are you willing to drive more than 1000 miles a month?", Answer: "yes" },
+        { Id: "1", Question: "do you own a car?", Answer: true }, 
+        { Id: "2", Question: "do you have a valid license?", Answer: true }, 
+        { Id: "3", Question: "have you ever had a DUI?", Answer: false },
+        { Id: "4", Question: "are you willing to drive more than 1000 miles a month?", Answer: true },
     ]
 
 // Handlers
@@ -32,13 +32,21 @@ export const getApplications = async (accepted = true) => {
 // STRETCH: account for Job listing ID in association with acceptibleAnswers - to keep the acceptible answers -> accepted application dynamic
 export const addApplication = async (request, reply) => {
     const {Name, Questions} = request.body
-    const { data, error } = await supabase
-        .from('applications')
-        .insert([
-        { Accepted: isAcceptedApplication(Questions), Name, Questions },
-    ])
+    console.log("request body:", request.body)
+    
+    try {
+        const { data, error } = await supabase
+            .from('applications')
+            .insert([
+            { Accepted: isAcceptedApplication(Questions), Name, Questions },
+        ])
+    
+        return {data, error}
 
-    return {data, error}
+    } catch(error) {
+        return {data: null, error}
+    }
+
 }
 
 
@@ -47,16 +55,16 @@ export const addApplication = async (request, reply) => {
 // or have more statuses instead of a bool: i.e. Stats: ['Accepted', 'Rejected', 'Investigate?', 'etc']
 // would need further insight / discussion to see value in chasing this rabbit. 
 export const isAcceptedApplication = (questions) => {
-    let test
+    let validQuestions
     if(Array.isArray(questions) && questions.length > 0) {
-        test = questions.map(question => {
-            // {  Id: "1", Answer: "yes" }
+        validQuestions = questions.map(question => {
+            // {  Id: "1", Answer: "true" }
             const answerIndex = acceptibleAnswers.findIndex(x => x.Id == question.Id)
-            return acceptibleAnswers[answerIndex].Answer == question.Answer ? true : false
+            return acceptibleAnswers[answerIndex].Answer == !!question.Answer ? true : false
         });
     } else {
         console.log('questions are not coming through as an array.')
     }
 
-    return test.includes(false) ? false : true
+    return validQuestions.includes(false) ? false : true
 }
