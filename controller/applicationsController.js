@@ -3,11 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_PUBLIC_KEY
-const supabase = createClient(supabaseUrl, supabaseKey, {
-    autoRefreshToken: false,
-    detectSessionInUrl: false,
-    persistSession: false,
-  })
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 //
 // Storing the acceptible answers in memory
