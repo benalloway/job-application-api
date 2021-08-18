@@ -55,15 +55,13 @@ export const addApplication = async (request, reply) => {
 function qualifyApplication (questions) {
     
     if(Array.isArray(questions) && questions.length > 0) {
-        return questions.filter(x => {
+        return !questions.filter(x => {
             // filter out non-qualifying questions
             return acceptibleAnswers.find(aa => aa.Id === x.Id)
-        }).reduce((prevQuestion, currentQuestion) => { 
-            // if they don't meet a single qualifications the application is not qualified so return false  
-            if(!prevQuestion) return false
+        }).map((q) => { 
             // see if the answer they gave matches acceptible answers
-            return acceptibleAnswers.find(x => x.Id == currentQuestion.Id).Answer === Boolean(currentQuestion.Answer)
-        });
+            return acceptibleAnswers.find(x => x.Id == q.Id).Answer === q.Answer
+        }).includes(false);
     } else {
         throw("Something went wrong in qualifyApplication")
     }
