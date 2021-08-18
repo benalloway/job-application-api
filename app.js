@@ -37,14 +37,24 @@ server.register(cors, {
 
   // Get Accepted Applications
   server.get('/api/applications', async function (request, reply) {
-
-      const {accepted_applications, error} = await getApplications()
+      const {data: accepted_applications, error} = await getApplications()
 
       if(error) {
         return reply.status(500).send(error);
       }
 
       return reply.status(200).send(accepted_applications)
+  })
+  
+  // Get Rejected Applications
+  server.get('/api/rejected-applications', async function (request, reply) {
+      const {data: rejected_applications, error} = await getApplications(false)
+      console.log(rejected_applications)
+      if(error) {
+        return reply.status(500).send(error);
+      }
+
+      return reply.status(200).send(rejected_applications)
   })
 
   // Submit a new Application

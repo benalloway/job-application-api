@@ -19,26 +19,26 @@ const acceptibleAnswers = [
 // Getting accepted applications from db using the Accepted column to drive what the employer gets back.. 
 // Decided to store both application states, cause data!, I think it is valuable to store all the data at this point.
 //(went with one table with status column instead of two seperate tables, I believe it'll make it easier to manage the code base / db)
-export const getApplications = async (qualified = true) => {
-    const { data: accepted_applications, error } = await supabase
+export const getApplications = async (isQualified = true) => {
+    const { data, error } = await supabase
         .from('applications')
         .select('*')
-        .eq('qualified', qualified)
+        .eq('qualified', isQualified)
 
-    return {accepted_applications, error};
+    return {data, error};
 }
 
 // TODO: Need to make sure to implement defensive programming from a UX perspective
 // STRETCH: account for Job listing ID in association with acceptibleAnswers - to keep the acceptible answers -> accepted application dynamic
 export const addApplication = async (request, reply) => {
-    const {name, questions} = request.body
+    const {name, email, questions} = request.body
     console.log("request body:", request.body)
     
     try {
         const { data, error } = await supabase
             .from('applications')
             .insert([
-            { qualified: qualifyApplication(questions), name, questions },
+            { qualified: qualifyApplication(questions), name, email, questions },
         ])
     
         return {data, error}
