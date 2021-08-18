@@ -36,6 +36,7 @@ export const addApplication = async (request, reply) => {
 
     let isQualified
 
+    // grab acceptible answers for this job-listing from the DB
     try {
         const {data, error} = await supabase
                 .from('job_listings')
@@ -46,12 +47,14 @@ export const addApplication = async (request, reply) => {
         
         if(error) return {data: null, error}
     
-        isQualified = qualifyApplication(questions, data)
+        // check if the application meets min. qualifications based on Acceptible Answers.
+        isQualified = isQualifiedApplication(questions, data)
 
     } catch(error) {
         return {data: null, error}
     }
 
+    // Save application to DB with proper qualified status
     try {
         const { data, error } = await supabase
             .from('applications')
@@ -69,15 +72,27 @@ export const addApplication = async (request, reply) => {
 
 // 
 // Takes just the questions that matter for qualification purposes, and determines if the submitted application meets min. qualifications.
-function qualifyApplication (questions, acceptibleAnswers) {
+// step 1. filter out non-qualifying questions
+// step 2. filter out qualifying questions that are answered correctly
+// step 3. if there are no failed questions - returns true.
+function isQualifiedApplication(questions, acceptibleAnswers) {
     if(Array.isArray(questions) && questions.length > 0) {
-        return !questions.filter(x => {
-            // filter out non-qualifying questions
-            return acceptibleAnswers.find(aa => aa.Id === x.Id)
-        }).map((q) => { 
-            // see if the answer they gave matches acceptible answers
-            return acceptibleAnswers.find(x => x.Id == q.Id).Answer === q.Answer
-        }).includes(false);
+        // keep track of any qualifying questions that fail
+        const failedQuestions = questions.filter(question => {
+            // check if this question is a qualifying question
+            const qualifyingQuestion = acceptibleAnswers.find(answer => answer.Id === question.Id)
+            
+            // filter out if it is not a qualifying question
+            if (!qualifyingQuestion) {
+              return false
+            }
+          
+            // filter out correctly answered qualifying questions - leaving just failed questions.
+            return qualifyingQuestion.Answer !== question.Answer
+        })
+        
+        // if there are no failed questions: Bob's your uncle!
+        return failedQuestions.length === 0
     } else {
         throw("Something went wrong in qualifyApplication")
     }
