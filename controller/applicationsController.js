@@ -42,13 +42,14 @@ export const addApplication = async (request, reply) => {
                 .from('job_listings')
                 .select('acceptible_answers')
                 .eq('id', job_listing_id)
+                .single()
         
         console.log("returned data from job_listing.acceptible_answers", data)
         
         if(error) return {data: null, error}
     
         // check if the application meets min. qualifications based on Acceptible Answers.
-        isQualified = isQualifiedApplication(questions, data)
+        isQualified = isQualifiedApplication(questions, data.acceptible_answers)
 
     } catch(error) {
         return {data: null, error}
@@ -76,6 +77,9 @@ export const addApplication = async (request, reply) => {
 // step 2. filter out qualifying questions that are answered correctly
 // step 3. if there are no failed questions - returns true.
 function isQualifiedApplication(questions, acceptibleAnswers) {
+    console.log("questions", questions)
+    console.log("acceptible anwers", acceptibleAnswers)
+
     if(Array.isArray(questions) && questions.length > 0) {
         // keep track of any qualifying questions that fail
         const failedQuestions = questions.filter(question => {
