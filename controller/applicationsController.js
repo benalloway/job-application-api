@@ -19,11 +19,11 @@ const acceptibleAnswers = [
 // Getting accepted applications from db using the Accepted column to drive what the employer gets back.. 
 // Decided to store both application states, cause data!, I think it is valuable to store all the data at this point.
 //(went with one table with status column instead of two seperate tables, I believe it'll make it easier to manage the code base / db)
-export const getApplications = async (accepted = true) => {
+export const getApplications = async (qualified = true) => {
     const { data: accepted_applications, error } = await supabase
         .from('applications')
         .select('*')
-        .eq('Accepted', accepted)
+        .eq('qualified', qualified)
 
     return {accepted_applications, error};
 }
@@ -31,14 +31,14 @@ export const getApplications = async (accepted = true) => {
 // TODO: Need to make sure to implement defensive programming from a UX perspective
 // STRETCH: account for Job listing ID in association with acceptibleAnswers - to keep the acceptible answers -> accepted application dynamic
 export const addApplication = async (request, reply) => {
-    const {Name, Questions} = request.body
+    const {name, questions} = request.body
     console.log("request body:", request.body)
     
     try {
         const { data, error } = await supabase
             .from('applications')
             .insert([
-            { Accepted: isAcceptedApplication(Questions), Name, Questions },
+            { qualified: qualifyApplication(questions), name, questions },
         ])
     
         return {data, error}
@@ -54,17 +54,20 @@ export const addApplication = async (request, reply) => {
 // STRETCH: storing all the data, rejected and accepted, maybe enhance our rejection function to store it if they miss like just one question?
 // or have more statuses instead of a bool: i.e. Stats: ['Accepted', 'Rejected', 'Investigate?', 'etc']
 // would need further insight / discussion to see value in chasing this rabbit. 
-export const isAcceptedApplication = (questions) => {
-    let validQuestions
+function qualifyApplication (questions) {
+    
     if(Array.isArray(questions) && questions.length > 0) {
-        validQuestions = questions.map(question => {
-            // {  Id: "1", Answer: "true" }
-            const answerIndex = acceptibleAnswers.findIndex(x => x.Id == question.Id)
-            return acceptibleAnswers[answerIndex].Answer == !!question.Answer ? true : false
+        return questions.filter(x => {
+            // filter out non-qualifying questions
+            return acceptibleAnswers.find(aa => aa.Id === x.Id)
+        }).reduce((prevQuestion, currentQuestion) => { 
+            // if they don't meet a single qualifications the application is not qualified so return false  
+            if(!prevQuestion) return false
+            // see if the answer they gave matches acceptible answers
+            return acceptibleAnswers.find(x => x.Id == currentQuestion.Id).Answer === Boolean(currentQuestion.Answer)
         });
     } else {
         console.log('questions are not coming through as an array.')
+        throw("Something went wrong in qualifyApplication")
     }
-
-    return validQuestions.includes(false) ? false : true
 }

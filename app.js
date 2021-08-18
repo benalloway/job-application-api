@@ -6,7 +6,7 @@ const server = fastify({
 })
 
 
-import {getApplications, addApplication} from './controller/applications.js'
+import {getApplications, addApplication} from './controller/applicationsController.js'
 
 // Implement a solution that:
 // 1. Contains a list of Questions with an acceptable answer for each question:
@@ -54,7 +54,7 @@ server.register(cors, {
       }
     }, async function (request, reply){
         const {data, error} = await addApplication(request, reply)
-       
+        console.log("request.body in app.js", request.body)
         if(error) {
           return reply.status(500).send(error);
         }
@@ -63,8 +63,8 @@ server.register(cors, {
     }
   )
   
-  // Run the server!
-  server.listen(process.env.PORT || 3000, '0.0.0.0', function (err, address) {
+  // Run the server
+  server.listen(process.env.PORT, '0.0.0.0', function (err, address) {
     if (err) {
       server.log.error(err)
       process.exit(1)
