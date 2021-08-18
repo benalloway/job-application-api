@@ -1,12 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
+// import supabase from '../supabase'
 
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_PUBLIC_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    persistSession: false,
+  })
 
+//
 // Storing the acceptible answers in memory
 // TODO: move to db table for reference
-// STRETCH: Once in db, allow for the table to be used accross different job listings by storing listing ID
+// STRETCH: Once in db, allow for the table to be used accross different job listings by storing listing ID so:
+// table_1 : job_listing: id, acceptible answers
+// table_2 : applications: id, qualified, name, email, questions, job_listing__id
 const acceptibleAnswers = [ 
         { Id: "1", Question: "do you own a car?", Answer: true }, 
         { Id: "2", Question: "do you have a valid license?", Answer: true }, 
@@ -14,11 +22,8 @@ const acceptibleAnswers = [
         { Id: "4", Question: "are you willing to drive more than 1000 miles a month?", Answer: true },
     ]
 
-// Handlers
-
-// Getting accepted applications from db using the Accepted column to drive what the employer gets back.. 
+//
 // Decided to store both application states, cause data!, I think it is valuable to store all the data at this point.
-//(went with one table with status column instead of two seperate tables, I believe it'll make it easier to manage the code base / db)
 export const getApplications = async (isQualified = true) => {
     const { data, error } = await supabase
         .from('applications')
@@ -28,8 +33,8 @@ export const getApplications = async (isQualified = true) => {
     return {data, error};
 }
 
-// TODO: Need to make sure to implement defensive programming from a UX perspective
-// STRETCH: account for Job listing ID in association with acceptibleAnswers - to keep the acceptible answers -> accepted application dynamic
+//
+// post job application to supabase table with qualified field driving whether it's viewable by employer or not.
 export const addApplication = async (request, reply) => {
     const {name, email, questions} = request.body
     console.log("request body:", request.body)
@@ -49,11 +54,8 @@ export const addApplication = async (request, reply) => {
 
 }
 
-
-// TODO: Need to test, analyze, and determine if this function can be enhanced!
-// STRETCH: storing all the data, rejected and accepted, maybe enhance our rejection function to store it if they miss like just one question?
-// or have more statuses instead of a bool: i.e. Stats: ['Accepted', 'Rejected', 'Investigate?', 'etc']
-// would need further insight / discussion to see value in chasing this rabbit. 
+// 
+// Takes just the questions that matter for qualification purposes, and determines if the submitted application meets min. qualifications.
 function qualifyApplication (questions) {
     
     if(Array.isArray(questions) && questions.length > 0) {
@@ -67,7 +69,6 @@ function qualifyApplication (questions) {
             return acceptibleAnswers.find(x => x.Id == currentQuestion.Id).Answer === Boolean(currentQuestion.Answer)
         });
     } else {
-        console.log('questions are not coming through as an array.')
         throw("Something went wrong in qualifyApplication")
     }
 }
