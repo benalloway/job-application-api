@@ -23,7 +23,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 export const getApplications = async (isQualified = true) => {
     const { data, error } = await supabase
         .from('applications')
-        .select('*')
+        .select('id, name, qualified, questions, email, job_listing_id ( title )')
         .eq('qualified', isQualified)
 
     return {data, error};
