@@ -49,7 +49,6 @@ server.register(cors, {
   // Get Rejected Applications
   server.get('/api/rejected-applications', async function (request, reply) {
       const {data: rejected_applications, error} = await getApplications(false)
-      console.log(rejected_applications)
       if(error) {
         return reply.status(500).send(error);
       }
@@ -64,7 +63,6 @@ server.register(cors, {
       }
     }, async function (request, reply){
         const {data, error} = await addApplication(request, reply)
-        console.log("request.body in app.js", request.body)
         if(error) {
           return reply.status(500).send(error);
         }
