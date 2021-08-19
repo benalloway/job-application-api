@@ -40,12 +40,11 @@ export const getApplications = async (isQualified = true) => {
 //
 // post job application to supabase table with qualified field driving whether it's viewable by employer or not.
 export const addApplication = async (request, reply) => {
-    const {name, email, questions} = request.body
-    // storing job_listing_id here to conform to requirements of the code review
-    const job_listing_id = "e84f7e28-c8c7-4588-8f81-e2a51e776564"
-
-    
+    const {job_listing_id: jobListingId, name, email, questions} = request.body
     let isQualified
+    
+    // storing job_listing_id here to conform to requirements of the code review - not requiring you to submit job_listing_id
+    const job_listing_id = jobListingId ?? "e84f7e28-c8c7-4588-8f81-e2a51e776564"
 
     // grab acceptible answers for this job-listing from the DB
     try {
