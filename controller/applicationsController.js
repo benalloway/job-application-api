@@ -18,6 +18,14 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 //         { Id: "4", Question: "are you willing to drive more than 1000 miles a month?", Answer: true },
 //     ]
 
+// const json format for submitting request via API
+// [
+//     { "Id": "1", "Question": "do you own a car?", "Answer": true }, 
+//     { "Id": "2", "Question": "do you have a valid license?", "Answer": true }, 
+//     { "Id": "3", "Question": "have you ever had a DUI?", "Answer": false },
+//     { "Id": "4", "Question": "are you willing to drive more than 1000 miles a month?", "Answer": true }
+// ]
+
 //
 // Decided to store both application states, cause data!, I think it is valuable to store all the data at this point.
 export const getApplications = async (isQualified = true) => {
@@ -32,8 +40,11 @@ export const getApplications = async (isQualified = true) => {
 //
 // post job application to supabase table with qualified field driving whether it's viewable by employer or not.
 export const addApplication = async (request, reply) => {
-    const {job_listing_id, name, email, questions} = request.body
+    const {name, email, questions} = request.body
+    // storing job_listing_id here to conform to requirements of the code review
+    const job_listing_id = "e84f7e28-c8c7-4588-8f81-e2a51e776564"
 
+    
     let isQualified
 
     // grab acceptible answers for this job-listing from the DB
