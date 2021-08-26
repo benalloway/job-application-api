@@ -91,6 +91,11 @@ function isQualifiedApplication(questions, acceptibleAnswers) {
     console.log("acceptible anwers", acceptibleAnswers)
 
     if(Array.isArray(questions) && questions.length > 0) {
+        
+        // first check is to make sure we have the right amount of acceptible questions - if not return false
+        const acceptibleQuestions = questions.filter(question => acceptibleAnswers.find(answer => answer.Id === question.Id))
+        if(acceptibleAnswers?.length !== acceptibleQuestions?.length) return false
+
         // keep track of any qualifying questions that fail
         const failedQuestions = questions.filter(question => {
             // check if this question is a qualifying question

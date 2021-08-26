@@ -27,6 +27,7 @@ server.register(cors, {
     origin: [
       "https://job-application-app.onrender.com",
       "http://localhost:3000",
+      "http://localhost:4200",
     ],
   });
 
