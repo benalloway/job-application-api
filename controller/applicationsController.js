@@ -5,29 +5,13 @@ const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_PUBLIC_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-//
-// Storing the acceptible answers in memory
-// TODO: move to db table for reference
-// STRETCH: Once in db, allow for the table to be used accross different job listings by storing listing ID so:
-// table_1 : job_listing: id, acceptible answers
-// table_2 : applications: id, qualified, name, email, questions, job_listing__id
-// const acceptibleAnswers = [ 
-//         { Id: "1", Question: "do you own a car?", Answer: true }, 
-//         { Id: "2", Question: "do you have a valid license?", Answer: true }, 
-//         { Id: "3", Question: "have you ever had a DUI?", Answer: false },
-//         { Id: "4", Question: "are you willing to drive more than 1000 miles a month?", Answer: true },
-//     ]
-
-// const json format for submitting request via API
-// [
-//     { "Id": "1", "Question": "do you own a car?", "Answer": true }, 
-//     { "Id": "2", "Question": "do you have a valid license?", "Answer": true }, 
-//     { "Id": "3", "Question": "have you ever had a DUI?", "Answer": false },
-//     { "Id": "4", "Question": "are you willing to drive more than 1000 miles a month?", "Answer": true }
-// ]
+// DB design:
+// (table_1) job_listing: id, acceptible answers
+// (table_2) applications: id, qualified, name, email, questions, job_listing__id
 
 //
-// Decided to store both application states, cause data!, I think it is valuable to store all the data at this point.
+// Decided to store both application states, this way we can analyze all submissions to determine (for example) 
+// do we need to update job listing description to not mislead those who do not qualifiy?
 export const getApplications = async (isQualified = true) => {
     const { data, error } = await supabase
         .from('applications')
@@ -38,7 +22,7 @@ export const getApplications = async (isQualified = true) => {
 }
 
 //
-// post job application to supabase table with qualified field driving whether it's viewable by employer or not.
+// post job application to db table with qualified field driving whether it's viewable by employer or not.
 export const addApplication = async (request, reply) => {
     const {job_listing_id: jobListingId, name, email, questions} = request.body
     let isQualified
@@ -94,6 +78,9 @@ function isQualifiedApplication(questions, acceptibleAnswers) {
         
         // first check is to make sure we have the right amount of acceptible questions - if not return false
         const acceptibleQuestions = questions.filter(question => acceptibleAnswers.find(answer => answer.Id === question.Id))
+
+        // quickly check to make sure we have the min. amount of acceptible answers for this job listing.
+        // TODO: maybe enhance this to make sure acceptible answers coming through is 1:1 with acceptible answers in db? (like each individual one)
         if(acceptibleAnswers?.length !== acceptibleQuestions?.length) return false
 
         // keep track of any qualifying questions that fail
