@@ -28,6 +28,7 @@ server.register(cors, {
       "https://job-application-app.onrender.com",
       "http://localhost:3000",
       "http://localhost:4200",
+      "https://snag-angular.netlify.app"
     ],
   });
 
