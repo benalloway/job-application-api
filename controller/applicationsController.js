@@ -31,16 +31,16 @@ export const addApplication = async (request, reply) => {
     const job_listing_id = jobListingId ?? "e84f7e28-c8c7-4588-8f81-e2a51e776564"
 
     // grab acceptible answers for this job-listing from the DB
-    const {data, error} = await supabase
+    const {data: joblisting, error:joblistingError} = await supabase
             .from('job_listings')
             .select('acceptible_answers')
             .eq('id', job_listing_id)
             .single()
     
-    if(error) return {data: null, error}
+    if(joblistingError) return {data: null, joblistingError}
 
     // check if the application meets min. qualifications based on Acceptible Answers.
-    isQualified = validate(questions, data.acceptible_answers)
+    isQualified = validate(questions, joblisting.acceptible_answers)
 
     // Save application to DB with proper qualified status
     const { data, error } = await supabase
